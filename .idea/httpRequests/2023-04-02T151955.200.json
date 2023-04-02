@@ -1,0 +1,59 @@
+[
+  {
+    "title": "A Night at the Opera",
+    "artist": "Queen",
+    "release_date": "1975-03-18",
+    "songs": [
+      {
+        "title": "Bohemian Rhapsody",
+        "artist": "Queen"
+      },
+      {
+        "title": "You're My Best Friend",
+        "artist": "Queen"
+      },
+      {
+        "title": "Love of My Life",
+        "artist": "Queen"
+      }
+    ]
+  },
+  {
+    "title": "Led Zeppelin IV",
+    "artist": "Led Zeppelin",
+    "release_date": "1971-03-18",
+    "songs": [
+      {
+        "title": "Black Dog",
+        "artist": "Led Zeppelin"
+      },
+      {
+        "title": "Rock and Roll",
+        "artist": "Led Zeppelin"
+      },
+      {
+        "title": "Stairway to Heaven",
+        "artist": "Led Zeppelin"
+      }
+    ]
+  },
+  {
+    "title": "Thriller",
+    "artist": "Michael Jackson",
+    "release_date": "1982-03-18",
+    "songs": [
+      {
+        "title": "Thriller",
+        "artist": "Michael Jackson"
+      },
+      {
+        "title": "Beat It",
+        "artist": "Michael Jackson"
+      },
+      {
+        "title": "Billie Jean",
+        "artist": "Michael Jackson"
+      }
+    ]
+  }
+]

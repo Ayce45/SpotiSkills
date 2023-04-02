@@ -1,0 +1,54 @@
+POST http://localhost/api/albums
+Content-Type: application/json
+
+{
+    "id": 999,
+    "value": "content"
+}
+
+<> 2023-04-02T153455.500.html
+
+###
+
+POST http://localhost/albums
+Content-Type: application/json
+
+{
+    "id": 999,
+    "value": "content"
+}
+
+<> 2023-04-02T153417.404.html
+
+###
+
+GET http://localhost/api/songs
+
+<> 2023-04-02T152516.500.html
+
+###
+
+GET http://localhost/api/playlists
+
+<> 2023-04-02T152432.200.json
+
+###
+
+GET http://localhost/api/playlists
+
+<> 2023-04-02T152124.500.html
+
+###
+
+GET http://localhost/api/albums
+
+<> 2023-04-02T152003.200.json
+
+###
+
+GET http://localhost/api/albums
+
+<> 2023-04-02T151955.200.json
+
+###
+

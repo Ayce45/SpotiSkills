@@ -1,0 +1,38 @@
+[
+  {
+    "title": "Rock Classics",
+    "author": "John Doe",
+    "songs": [
+      {
+        "title": "Love of My Life",
+        "artist": "Queen"
+      },
+      {
+        "title": "Black Dog",
+        "artist": "Led Zeppelin"
+      },
+      {
+        "title": "Stairway to Heaven",
+        "artist": "Led Zeppelin"
+      }
+    ]
+  },
+  {
+    "title": "80s Pop",
+    "author": "John Doe",
+    "songs": [
+      {
+        "title": "You're My Best Friend",
+        "artist": "Queen"
+      },
+      {
+        "title": "Love of My Life",
+        "artist": "Queen"
+      },
+      {
+        "title": "Billie Jean",
+        "artist": "Michael Jackson"
+      }
+    ]
+  }
+]
