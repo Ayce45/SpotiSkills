@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Album;
+use App\Models\Playing;
 use App\Models\Playlist;
+use App\Models\SignupRequest;
 use App\Models\Song;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -24,8 +26,9 @@ class Controller extends BaseController
      */
     public function albumsGet()
     {
-        return response(Album::with('songs')->get(), 200);
+        return response(['albums' => Album::with('songs')->orderBy('release_date', 'desc')->get()], 200);
     }
+
     /**
      * Operation albumsPost
      *
@@ -45,7 +48,7 @@ class Controller extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return response('La requête est mal formulée...', 400);
+            return response(['message' => 'La requête est mal formulée'], 400);
         }
 
         $album = new Album();
@@ -54,8 +57,9 @@ class Controller extends BaseController
         $album->release_date = $input['release_date'];
         $album->save();
 
-        return response('Chanson ajoutée avec succès');
+        return response(['message' => 'Album ajoutée avec succès'], 201);
     }
+
     /**
      * Operation playlistsGet
      *
@@ -71,8 +75,9 @@ class Controller extends BaseController
             $playlist->songs = $playlist->songs();
         });
 
-        return response($playlists, 200);
+        return response(["playlists" => $playlists], 200);
     }
+
     /**
      * Operation playlistsPost
      *
@@ -85,18 +90,34 @@ class Controller extends BaseController
     {
         $input = Request::all();
 
-        //path params validation
+        $validator = Validator::make($input, [
+            'title' => 'required',
+            'author' => 'required',
+            'songs' => 'required|array',
+        ]);
 
-
-        //not path params validation
-        if (!isset($input['newPlaylist'])) {
-            throw new \InvalidArgumentException('Missing the required parameter $newPlaylist when calling playlistsPost');
+        if ($validator->fails()) {
+            return response(['message' => 'La requête est mal formulée'], 400);
         }
-        $newPlaylist = $input['newPlaylist'];
 
+        $playlist = new Playlist();
+        $playlist->title = $input['title'];
+        $playlist->author = $input['author'];
 
-        return response('How about implementing playlistsPost as a post method ?');
+        foreach ($input['songs'] as $songId) {
+            $song = Song::find($songId);
+            if (!$song) {
+                return response(['message' => 'La chanson n\'existe pas'], 404);
+            }
+        }
+
+        $playlist->songs = '[' . implode(',', $input['songs']) . ']';
+
+        $playlist->save();
+
+        return response(['message' => 'Playlist ajoutée avec succès'], 201);
     }
+
     /**
      * Operation signupPost
      *
@@ -109,18 +130,41 @@ class Controller extends BaseController
     {
         $input = Request::all();
 
-        //path params validation
+        $validator = Validator::make($input, [
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+            'confirm_password' => 'required|same:password',
+            'first_name' => 'required',
+            'last_name' => 'required',
+        ]);
 
-
-        //not path params validation
-        if (!isset($input['newSignupRequest'])) {
-            throw new \InvalidArgumentException('Missing the required parameter $newSignupRequest when calling signupPost');
+        if ($validator->fails()) {
+            return response(['message' => 'La requête est mal formulée'], 400);
         }
-        $newSignupRequest = $input['newSignupRequest'];
 
+        $signup = new SignupRequest();
+        $signup->email = $input['email'];
+        $signup->password = $input['password'];
+        $signup->first_name = $input['first_name'];
+        $signup->last_name = $input['last_name'];
+        $signup->save();
 
-        return response('How about implementing signupPost as a post method ?');
+        return response(['message' => "Demande d'inscription ajoutée avec succès"], 201);
     }
+
+    /**
+     * Operation songsGet
+     *
+     * Récupère une liste de chansons.
+     *
+     *
+     * @return Http response
+     */
+    public function signupGet()
+    {
+        return response(['signup' => SignupRequest::orderBy('id', 'desc')->where('status', '=', 'pending')->get()], 200);
+    }
+
     /**
      * Operation signupIdAcceptPut
      *
@@ -132,15 +176,17 @@ class Controller extends BaseController
      */
     public function signupIdAcceptPut($id)
     {
-        $input = Request::all();
+        $signup = SignupRequest::where('id', '=', $id)->where('status', '=', 'pending')->first();
+        if (!$signup) {
+            return response(['message' => 'La demande d\'inscription n\'existe pas'], 404);
+        }
 
-        //path params validation
+        $signup->status = 'accepted';
+        $signup->save();
 
-
-        //not path params validation
-
-        return response('How about implementing signupIdAcceptPut as a put method ?');
+        return response(['message' => 'Demande d\'inscription acceptée avec succès'], 200);
     }
+
     /**
      * Operation signupIdRejectPut
      *
@@ -152,15 +198,17 @@ class Controller extends BaseController
      */
     public function signupIdRejectPut($id)
     {
-        $input = Request::all();
+        $signup = SignupRequest::where('id', '=', $id)->where('status', '=', 'pending')->first();
+        if (!$signup) {
+            return response(['message' => 'La demande d\'inscription n\'existe pas'], 404);
+        }
 
-        //path params validation
+        $signup->status = 'rejected';
+        $signup->save();
 
-
-        //not path params validation
-
-        return response('How about implementing signupIdRejectPut as a put method ?');
+        return response(['message' => 'Demande d\'inscription refusée avec succès'], 200);
     }
+
     /**
      * Operation songsGet
      *
@@ -171,8 +219,9 @@ class Controller extends BaseController
      */
     public function songsGet()
     {
-        return response(Song::all(), 200);
+        return response(['songs' => Song::orderBy('title', 'asc')->with('album')->get()], 200);
     }
+
     /**
      * Operation songsPost
      *
@@ -185,15 +234,32 @@ class Controller extends BaseController
     {
         $input = Request::all();
 
-        //path params validation
+        $validator = Validator::make($input, [
+            'title' => 'required',
+            'artist' => 'required',
+            'album_id' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response(['message' => 'La requête est mal formulée'], 400);
+        }
+
+        $album = Album::find($input['album_id']);
+
+        if (!$album) {
+            return response(['message' => 'L\'album n\'existe pas'], 404);
+        }
 
 
-        //not path params validation
-        $song = $input['song'];
+        $song = new Song();
+        $song->title = $input['title'];
+        $song->artist = $input['artist'];
+        $song->album_id = $input['album_id'];
+        $song->save();
 
-
-        return response('How about implementing songsPost as a post method ?');
+        return response(['message' => 'Chanson ajoutée avec succès'], 201);
     }
+
     /**
      * Operation songsIdGet
      *
@@ -205,15 +271,15 @@ class Controller extends BaseController
      */
     public function songsIdGet($id)
     {
-        $input = Request::all();
+        $song = Song::whereId($id)->with('album')->first();
 
-        //path params validation
+        if (!$song) {
+            return response(['message' => 'La chanson n\'existe pas'], 404);
+        }
 
-
-        //not path params validation
-
-        return response('How about implementing songsIdGet as a get method ?');
+        return response(['song' => $song], 200);
     }
+
     /**
      * Operation statsGet
      *
@@ -226,18 +292,98 @@ class Controller extends BaseController
     {
         $input = Request::all();
 
-        //path params validation
+        $validator = Validator::make($input, [
+            'type' => 'required|in:artists,albums,songs,playing_time',
+            'user_id' => 'exists:User,id',
+            'from' => 'date_format:Y-m-d',
+            'to' => 'date_format:Y-m-d',
+        ]);
 
-
-        //not path params validation
-        if (!isset($input['type'])) {
-            throw new \InvalidArgumentException('Missing the required parameter $type when calling statsGet');
+        if ($validator->fails()) {
+            return response(['message' => 'La requête est mal formulée'], 400);
         }
-        $type = $input['type'];
 
-        $userId = $input['userId'];
+        $query = Playing::query();
 
+        if (isset($input['user_id'])) {
+            $query = $query->where('user_id', '=', $input['user_id']);
+        }
+        if (isset($input['from'])) {
+            $query = $query->where('playing_at', '>=', $input['from']);
+        }
+        if (isset($input['to'])) {
+            $query = $query->where('playing_at', '<=', $input['to']);
+        }
 
-        return response('How about implementing statsGet as a get method ?');
+        if ($input['type'] === 'playing_time') {
+            $query = $query->selectRaw('SUM(time) as time');
+            $totalTime = $query->first()->time;
+
+            return response(['stats' => ['playing' => (int)$totalTime]], 200);
+        }
+
+        if ($input['type'] === 'albums') {
+            $query = $query->selectRaw('Song.album_id, SUM(time) as time')
+                ->join('Song', 'Song.id', '=', 'Playing.song_id')
+                ->groupBy('Song.album_id')
+                ->orderBy('time', 'desc')
+                ->limit(3);
+
+            $albums = $query->get();
+
+            $albumStats = [];
+
+            $albums->each(function ($album) use (&$albumStats) {
+                $albumData = Album::find($album->album_id);
+                $albumStats[] = [
+                    'time' => (int)$album->time,
+                    'title' => $albumData->title,
+                    'artist' => $albumData->artist,
+                ];
+            });
+            return response(['stats' => ['albums' => $albumStats]], 200);
+
+        }
+
+        if ($input['type'] === 'songs') {
+            $query = $query->selectRaw('song_id, SUM(time) as time')
+                ->groupBy('song_id')
+                ->orderBy('time', 'desc')
+                ->limit(3);
+
+            $songs = $query->get();
+
+            $songStats = [];
+
+            $songs->each(function ($song) use (&$songStats) {
+                $songData = Song::find($song->song_id);
+                $songStats[] = [
+                    'time' => (int)$song->time,
+                    'title' => $songData->title,
+                    'artist' => $songData->artist,
+                ];
+            });
+            return response(['stats' => ['songs' => $songStats]], 200);
+        }
+
+        if ($input['type'] === 'artists') {
+            $query = $query->selectRaw('Song.artist, SUM(time) as time')
+                ->join('Song', 'Song.id', '=', 'Playing.song_id')
+                ->groupBy('Song.artist')
+                ->orderBy('time', 'desc')
+                ->limit(3);
+
+            $artists = $query->get();
+
+            $artistStats = [];
+
+            $artists->each(function ($artist) use (&$artistStats) {
+                $artistStats[] = [
+                    'time' => (int)$artist->time,
+                    'artist' => $artist->artist,
+                ];
+            });
+            return response(['stats' => ['artists' => $artistStats]], 200);
+        }
     }
 }

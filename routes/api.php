@@ -58,6 +58,13 @@ Route::post('playlists', [Controller::class, 'playlistsPost']);
  */
 Route::post('signup', [Controller::class, 'signupPost']);
 /**
+ * post signupGet
+ * Summary: Récupère la liste des demande d'inscription
+ * Notes: Récupère la liste des demande d'inscription sur le service de streaming musical
+ * Output-Formats: [application/json]
+ */
+Route::get('signup', [Controller::class, 'signupGet']);
+/**
  * put signupIdAcceptPut
  * Summary: Accepter une demande d'inscription
  * Notes:

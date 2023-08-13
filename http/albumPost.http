@@ -1,7 +1,0 @@
-POST localhost/api/albums
-Content-Type: application/json
-
-{
-    "id": 999,
-    "value": "content"
-}

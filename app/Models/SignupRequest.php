@@ -1,30 +1,15 @@
 <?php
-/**
- * SignupRequest
- */
-namespace app\Models;
+namespace App\Models;
 
-/**
- * SignupRequest
- */
-class SignupRequest {
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-    /** @var string $id Identifiant unique de la demande d'inscription*/
-    public $id = "";
+class SignupRequest extends Model {
 
-    /** @var string $email Adresse email de l'utilisateur*/
-    public $email = "";
+    use HasFactory;
 
-    /** @var string $password Mot de passe de l'utilisateur*/
-    public $password = "";
-
-    /** @var string $firstName Prénom de l'utilisateur*/
-    public $firstName = "";
-
-    /** @var string $lastName Nom de famille de l'utilisateur*/
-    public $lastName = "";
-
-    /** @var string $status Statut de la demande d'inscription*/
-    public $status = "";
-
+    public $timestamps = false;
+    public $table = 'SignupRequest';
+    protected $fillable = ['email', 'password', 'first_name', 'last_name', 'status'];
+    protected $hidden = ['password', 'status'];
 }

@@ -13,4 +13,9 @@ class Song extends Model
     public $timestamps = false;
     protected $fillable = ['title', 'artist', 'album_id'];
     protected $hidden = ['album_id'];
+
+    public function album()
+    {
+        return $this->belongsTo(Album::class);
+    }
 }
